@@ -119,8 +119,7 @@ def generateData(r, Z, npairs, datafile):  # r = B*Linv, Z = Q*B*Linv
       est = reff(Z, i, j) / k
       err = abs(real - est) / real
       tot_err += err
-      n = n + 1 # pythonic?
-      data.append([i, j, real, est, err])
+      #data.append([i, j, real, est, err])
       f.write("%s %s %s %s %s\n" %(i, j, real, est, err))
       #print i, j, real, est, err
     else:
