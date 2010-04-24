@@ -1,0 +1,58 @@
+import gndemo
+from scipy import linalg
+import numpy as N
+import graph
+import pickle
+
+n = 10000
+
+fe = "graphs/edg_intphyale_10000"
+fi = "graphs/inv_intphyale_10000"
+
+f = open(fe, 'r')
+e = pickle.load(f)
+f.close()
+
+f = open(fi, 'r')
+Linv = pickle.load(f)
+f.close()
+
+#e = graph.edgeList("graphs/intphyale")
+#e = graph.trimGraph(e, n)
+B = gndemo.edges2incmat(e)
+#A = gndemo.edges2adjmat(e)
+#L = gndemo.adjmat2lap(A)
+#Linv = linalg.pinv(L.todense())  #takes time
+Linv = N.mat(Linv)  # convert array to matrix
+r = B * Linv
+#R = r * B.transpose()
+
+k = int(40 * N.log10(n))  # floor if > 0
+m = B.shape[0]  # m = number of edges in graph (number of rows of B)
+Q = gndemo.randMatrix(k, m)
+#Q = N.mat(Q)  # convert array to matrix
+
+Z = Q * B * Linv
+
+Z = Z.todense()
+r = r.todense()
+
+gndemo.reff(Z, 0, 1) / k
+gndemo.reff(r, 0, 1)
+
+a = N.random.randint(0, n - 1, size= 20)
+b = N.random.randint(0, n - 1, size= 20)
+
+tot_err = 0
+for i in a:
+  for j in b:
+    if i != j:  # prevents addition of nan
+      real = gndemo.reff(r, i, j)
+      est = gndemo.reff(Z, i, j) / k
+      err = N.abs(real - est) / real
+      tot_err += err    
+      print i, j, real, est, err
+
+averr = tot_err/400
+averr
+

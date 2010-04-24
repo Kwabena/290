@@ -1,0 +1,33 @@
+import gndemo
+from scipy import linalg
+import numpy as N
+import graph
+import pickle
+
+fe = "graphs/edg_evofd_5000"  # edgelist pickled here
+fi = "graphs/inv_evofd_5000"    # inverse of Laplacian pickled here
+
+f = open(fe, 'r')
+e = pickle.load(f)
+f.close()
+
+B = gndemo.edges2incmat(e)  # incidence matrix
+
+f = open(fi, 'r')
+Linv = pickle.load(f)
+f.close()
+
+Linv = N.mat(Linv)  # convert array to matrix
+r = B * Linv
+
+n = 5000
+k = int(40 * N.log10(n))
+m = B.shape[0]  # m = number of edges in graph (number of rows of B)
+Q = gndemo.randMatrix(k, m)
+
+Z = Q * B * Linv
+
+gndemo.reff(Z, 0, 1) / k
+gndemo.reff(r, 0, 1)
+
+data = gndemo.generateData(r, Z, 1000)

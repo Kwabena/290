@@ -1,0 +1,67 @@
+import gndemo
+from scipy import linalg
+import numpy as N
+import graph
+
+n = 10000
+
+#e = gndemo.path(n)  # the edge list of a path graph
+e = gndemo.randGraph(n, 25*n)
+B = gndemo.edges2incmat(e)
+A = gndemo.edges2adjmat(e)
+L = gndemo.adjmat2lap(A)
+Linv = linalg.pinv(L.todense())  #takes time
+Linv = N.mat(Linv)  # convert array to matrix
+r = B * Linv
+#R = r * B.transpose()
+
+k = int(40 * N.log10(n))  # floor if > 0
+m = B.shape[0]  # m = number of edges in graph (number of rows of B)
+Q = gndemo.randMatrix(k, m)
+#Q = N.mat(Q)  # convert array to matrix
+
+Z = Q * B * Linv
+
+gndemo.reff(Z, 0, 1) / k
+gndemo.reff(r, 0, 1)
+
+a = N.random.randint(0, 1499, size= 20)
+b = N.random.randint(0, 1499, size= 20)
+
+tot_err = 0
+for i in a:
+  for j in b:
+    if i != j:  # prevents addition of nan
+      real = gndemo.reff(r, i, j)
+      est = gndemo.reff(Z, i, j) / k
+      err = N.abs(real - est) / real
+      tot_err += err    
+      print i, j, real, est, err
+    
+    
+
+#pair  | reff  |  estimate | percent error = N.abs(reff - estimate) / reff
+
+
+n
+gndemo.solveResistances2(e)
+
+
+
+b = N.zeros(n)     # create a right-hand side to solve
+
+b[0] = 1
+
+b[-1] = -1
+
+ans = linalg.iterative.cg(l,b)  # solve the system
+
+x = ans[0]
+
+print x
+
+print l*x
+
+print linalg.norm(l*x - b)   # check that we got a good answer
+
+
